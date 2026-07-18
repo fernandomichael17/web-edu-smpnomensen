@@ -1,0 +1,169 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap');
+
+/* Variabel Desain Utama */
+:root {
+    --accent-blue: #1A3A5C;
+    --accent-blue-hover: #10243b;
+    --bg-light: #ffffff;
+    --bg-header: #4b5563; /* Abu-abu gelap sesuai gambar storyboard */
+    --bg-footer: #e5e7eb; /* Abu-abu terang sesuai gambar storyboard */
+    --text-main: #111827;
+    --text-muted: #6b7280;
+    --border-color: #cbd5e1;
+    --transition-smooth: all 0.2s ease-in-out;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Header Atas */
+.top-header {
+    background-color: var(--bg-header);
+    color: #ffffff;
+    padding: 1.1rem 2rem;
+    text-align: center;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* Footer Bawah */
+.bottom-footer {
+    background-color: var(--bg-footer);
+    color: #4b5563;
+    padding: 0.9rem 1rem;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-top: 1px solid #d1d5db;
+}
+
+/* Konten Utama */
+.main-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+    text-align: center;
+}
+
+/* Logo Bulat Sesuai Storyboard */
+.logo-circle {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background-color: #e5e7eb;
+    border: 3px solid #9ca3af;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: var(--transition-smooth);
+}
+
+.logo-circle:hover {
+    transform: scale(1.02);
+    border-color: var(--accent-blue);
+}
+
+.logo-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #4b5563;
+    letter-spacing: 2px;
+}
+
+/* Teks Selamat Datang */
+.welcome-text {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+}
+
+.school-text {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-bottom: 2.5rem;
+}
+
+/* Tombol Aksi */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    max-width: 320px;
+}
+
+.btn {
+    display: block;
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 6px;
+    text-align: center;
+    transition: var(--transition-smooth);
+    border: 2px solid transparent;
+}
+
+.btn-primary {
+    background-color: var(--accent-blue);
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-blue-hover);
+    box-shadow: 0 4px 12px rgba(26, 58, 92, 0.2);
+}
+
+.btn-secondary {
+    background-color: #ffffff;
+    color: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
+
+.btn-secondary:hover {
+    background-color: #f1f5f9;
+}
+
+/* Tampilan Gambar Logo Sekolah */
+.logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Menjaga aspek rasio gambar agar tidak pecah/terdistorsi */
+    border-radius: 50%;  /* Menjaga gambar tetap berbentuk lingkaran */
+    padding: 8px;        /* Margin dalam agar logo sekolah terlihat rapi di dalam lingkaran */
+}
+
