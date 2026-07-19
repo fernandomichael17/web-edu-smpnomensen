@@ -270,7 +270,7 @@ try {
                     <li><a href="dashboard.php" class="active">Dashboard</a></li>
                     <li><a href="kelola_materi.php">Kelola Materi</a></li>
                     <li><a href="upload_media.php">Upload Media</a></li>
-                    <li><a href="#">Kelola Soal</a></li>
+                    <li><a href="kelola_soal.php">Kelola Soal</a></li>
                     <li><a href="laporan_nilai.php">Laporan Nilai</a></li>
                     <li><a href="pengaturan.php">Pengaturan</a></li>
                     <li><a href="kelola_siswa.php">Kelola Data Siswa</a></li>

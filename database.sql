@@ -61,9 +61,12 @@ CREATE TABLE tb_kuis (
     judul_kuis VARCHAR(150) NOT NULL,
     kategori_materi ENUM('Vocabulary', 'Grammar', 'Conversation', 'Campuran') NOT NULL,
     waktu_pengerjaan INT NOT NULL, -- durasi timer kuis (dalam menit)
+    id_materi INT NULL,
+    nilai_lulus INT DEFAULT 70,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     id_guru INT,
-    FOREIGN KEY (id_guru) REFERENCES tb_guru(id_guru) ON DELETE SET NULL
+    FOREIGN KEY (id_guru) REFERENCES tb_guru(id_guru) ON DELETE SET NULL,
+    FOREIGN KEY (id_materi) REFERENCES tb_materi(id_materi) ON DELETE SET NULL
 );
 
 -- 7. tb_soal (Menyimpan daftar soal untuk setiap kuis)
