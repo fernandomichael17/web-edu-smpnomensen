@@ -167,3 +167,197 @@ body {
     padding: 8px;        /* Margin dalam agar logo sekolah terlihat rapi di dalam lingkaran */
 }
 
+/* ==========================================================================
+   LAYOUT SISTEM SISWA (SIDEBAR + MAIN CONTENT)
+   ========================================================================== */
+
+.siswa-layout {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* Sidebar Siswa */
+.siswa-sidebar {
+    width: 280px;
+    background-color: var(--accent-blue);
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05);
+}
+
+.siswa-sidebar-header {
+    padding: 2rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.siswa-sidebar-header h2 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.siswa-sidebar-menu {
+    list-style: none;
+    padding: 1.5rem 1rem;
+    flex-grow: 1;
+}
+
+.siswa-sidebar-menu li {
+    margin-bottom: 0.5rem;
+}
+
+.siswa-sidebar-menu a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    padding: 0.85rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: var(--transition-smooth);
+    gap: 0.85rem;
+}
+
+.siswa-sidebar-menu a:hover, 
+.siswa-sidebar-menu a.active {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.siswa-sidebar-footer {
+    padding: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+}
+
+.btn-sidebar-back {
+    color: rgba(255, 255, 255, 0.65);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition-smooth);
+}
+
+.btn-sidebar-back:hover {
+    color: #ffffff;
+}
+
+/* Area Konten Utama */
+.siswa-main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8fafc;
+}
+
+.siswa-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.2rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.siswa-header h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
+    color: var(--accent-blue);
+    font-weight: 700;
+}
+
+.siswa-header-school {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.siswa-content {
+    flex-grow: 1;
+    padding: 2.5rem;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.siswa-footer {
+    background-color: #ffffff;
+    border-top: 1px solid var(--border-color);
+    padding: 1.1rem 2rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+/* Grid & Kartu Menu Siswa */
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.menu-card {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2.2rem 1.5rem;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    transition: var(--transition-smooth);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+}
+
+.menu-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent-blue);
+    box-shadow: 0 10px 20px -5px rgba(26, 58, 92, 0.1);
+}
+
+.menu-card-icon {
+    width: 68px;
+    height: 68px;
+    background-color: #f0f5fa;
+    color: var(--accent-blue);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    transition: var(--transition-smooth);
+}
+
+.menu-card:hover .menu-card-icon {
+    background-color: var(--accent-blue);
+    color: #ffffff;
+}
+
+.menu-card h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    margin-bottom: 0.75rem;
+}
+
+.menu-card p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+
