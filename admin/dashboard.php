@@ -268,8 +268,8 @@ try {
                 <h3>Admin</h3>
                 <ul class="sidebar-menu">
                     <li><a href="dashboard.php" class="active">Dashboard</a></li>
-                    <li><a href="materi_vocabulary.php">Kelola Materi</a></li>
-                    <li><a href="#">Upload Media</a></li>
+                    <li><a href="kelola_materi.php">Kelola Materi</a></li>
+                    <li><a href="upload_media.php">Upload Media</a></li>
                     <li><a href="#">Kelola Soal</a></li>
                     <li><a href="#">Laporan Nilai</a></li>
                     <li><a href="#">Pengaturan</a></li>
