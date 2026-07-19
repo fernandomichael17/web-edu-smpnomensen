@@ -299,65 +299,91 @@ body {
     font-weight: 500;
 }
 
-/* Grid & Kartu Menu Siswa */
-.menu-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+/* Container & Kartu Menu Siswa Sesuai Storyboard */
+.menu-container {
+    display: flex;
+    flex-wrap: wrap;
     gap: 1.5rem;
+    justify-content: center;
     margin-top: 1.5rem;
 }
 
 .menu-card {
+    flex: 1 1 280px;
+    max-width: 320px;
     background: #ffffff;
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 2.2rem 1.5rem;
-    text-align: center;
-    text-decoration: none;
-    color: inherit;
-    transition: var(--transition-smooth);
+    border: 2px solid #374151; /* Outline tebal sesuai storyboard */
+    border-radius: 4px; /* Sudut tajam/rounded tipis sesuai storyboard */
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: var(--transition-smooth);
+    text-decoration: none;
+    color: inherit;
 }
 
 .menu-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 15px rgba(26, 58, 92, 0.1);
     border-color: var(--accent-blue);
-    box-shadow: 0 10px 20px -5px rgba(26, 58, 92, 0.1);
 }
 
-.menu-card-icon {
-    width: 68px;
-    height: 68px;
-    background-color: #f0f5fa;
-    color: var(--accent-blue);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1.5rem;
+.menu-card-header {
+    background-color: #e5e7eb; /* Header kartu abu-abu sesuai storyboard */
+    border-bottom: 2px solid #374151;
+    padding: 0.85rem 1rem;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-align: center;
+    color: #111827;
     transition: var(--transition-smooth);
 }
 
-.menu-card:hover .menu-card-icon {
-    background-color: var(--accent-blue);
-    color: #ffffff;
-}
-
-.menu-card h3 {
-    font-family: 'Outfit', sans-serif;
-    font-size: 1.3rem;
-    font-weight: 700;
+.menu-card:hover .menu-card-header {
+    background-color: var(--accent-blue-light);
     color: var(--accent-blue);
-    margin-bottom: 0.75rem;
+    border-bottom-color: var(--accent-blue);
 }
 
-.menu-card p {
+.menu-card-body {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    flex-grow: 1;
+    text-align: center;
+    min-height: 140px;
+}
+
+.menu-card-text {
     font-size: 0.9rem;
     color: var(--text-muted);
-    line-height: 1.6;
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
 }
+
+/* Tombol Buka di dalam Kartu */
+.menu-card-btn {
+    background-color: #4b5563; /* Warna default tombol abu-abu tua sesuai storyboard */
+    color: #ffffff;
+    padding: 0.55rem 2.2rem;
+    border: 2px solid #374151;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: inline-block;
+}
+
+.menu-card:hover .menu-card-btn {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
+
 
 

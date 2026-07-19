@@ -8,8 +8,8 @@
     <!-- Memanggil Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Memanggil CSS Utama secara relative terhadap folder siswa -->
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <!-- Memanggil CSS Utama secara relative terhadap folder siswa (dengan cache-buster v=1.0.1) -->
+    <link rel="stylesheet" href="../assets/css/style.css?v=1.0.1">
 </head>
 <body>
     <!-- Pembuka Layout Panel Siswa -->
