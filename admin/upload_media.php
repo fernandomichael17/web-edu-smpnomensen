@@ -137,6 +137,98 @@ if (isset($_GET['delete_word'])) {
     }
 }
 
+// ---------------------------------------------------------
+// PROSES TAMBAH / EDIT VIDEO CONVERSATION (POST)
+// ---------------------------------------------------------
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_video'])) {
+    $id_video = isset($_POST['id_video']) ? intval($_POST['id_video']) : 0;
+    $keterangan = trim($_POST['keterangan'] ?? '');
+    $file_video_name = '';
+
+    // Tangani unggah file video
+    if (isset($_FILES['file_video']) && $_FILES['file_video']['error'] === UPLOAD_ERR_OK) {
+        $file_tmp = $_FILES['file_video']['tmp_name'];
+        $orig_name = $_FILES['file_video']['name'];
+        $ext = strtolower(pathinfo($orig_name, PATHINFO_EXTENSION));
+        
+        $allowed_exts = ['mp4', 'webm', 'ogg'];
+        if (!in_array($ext, $allowed_exts)) {
+            $error_message = "Hanya file video (mp4, webm, ogg) yang diperbolehkan!";
+        } else {
+            // Generate nama file acak unik
+            $file_video_name = time() . '_' . uniqid() . '.' . $ext;
+            if (!move_uploaded_file($file_tmp, $video_upload_dir . $file_video_name)) {
+                $error_message = "Gagal memindahkan file video ke server.";
+                $file_video_name = '';
+            }
+        }
+    }
+
+    if (empty($error_message)) {
+        try {
+            if ($id_video > 0) {
+                // UPDATE VIDEO
+                if ($file_video_name !== '') {
+                    // Hapus file video lama dari server
+                    $stmt_old = $pdo->prepare("SELECT file_video FROM tb_video WHERE id_video = :id");
+                    $stmt_old->execute(['id' => $id_video]);
+                    $old_file = $stmt_old->fetchColumn();
+                    if ($old_file && file_exists($video_upload_dir . $old_file)) {
+                        @unlink($video_upload_dir . $old_file);
+                    }
+
+                    $stmt = $pdo->prepare("UPDATE tb_video SET file_video = :file, keterangan = :ket WHERE id_video = :id");
+                    $stmt->execute(['file' => $file_video_name, 'ket' => $keterangan, 'id' => $id_video]);
+                } else {
+                    $stmt = $pdo->prepare("UPDATE tb_video SET keterangan = :ket WHERE id_video = :id");
+                    $stmt->execute(['ket' => $keterangan, 'id' => $id_video]);
+                }
+                $success_message = "Video berhasil diperbarui!";
+            } else {
+                // INSERT VIDEO BARU
+                if ($file_video_name === '') {
+                    $error_message = "File video percakapan wajib diupload!";
+                } else {
+                    $stmt = $pdo->prepare("INSERT INTO tb_video (id_materi, file_video, keterangan) VALUES (:id_materi, :file, :ket)");
+                    $stmt->execute(['id_materi' => $id_materi, 'file' => $file_video_name, 'ket' => $keterangan]);
+                    $success_message = "Video baru berhasil diupload!";
+                }
+            }
+            if (empty($error_message)) {
+                header("Location: upload_media.php?id_materi=" . $id_materi . "&success=" . urlencode($success_message));
+                exit();
+            }
+        } catch (PDOException $e) {
+            $error_message = "Error database: " . $e->getMessage();
+        }
+    }
+}
+
+// ---------------------------------------------------------
+// PROSES HAPUS VIDEO CONVERSATION (GET)
+// ---------------------------------------------------------
+if (isset($_GET['delete_video'])) {
+    $id_video = intval($_GET['delete_video']);
+    try {
+        // Hapus file video fisik dari server
+        $stmt_file = $pdo->prepare("SELECT file_video FROM tb_video WHERE id_video = :id");
+        $stmt_file->execute(['id' => $id_video]);
+        $file = $stmt_file->fetchColumn();
+        if ($file && file_exists($video_upload_dir . $file)) {
+            @unlink($video_upload_dir . $file);
+        }
+
+        // Hapus dari database
+        $stmt = $pdo->prepare("DELETE FROM tb_video WHERE id_video = :id");
+        $stmt->execute(['id' => $id_video]);
+        $success_message = "Video berhasil dihapus!";
+        header("Location: upload_media.php?id_materi=" . $id_materi . "&success=" . urlencode($success_message));
+        exit();
+    } catch (PDOException $e) {
+        $error_message = "Error database saat menghapus: " . $e->getMessage();
+    }
+}
+
 // Ambil pesan sukses redirect
 if (isset($_GET['success'])) {
     $success_message = $_GET['success'];
@@ -146,23 +238,43 @@ if (isset($_GET['success'])) {
 // BACA DATA KATA & MEDIA UNTUK UNIT AKTIF
 // ---------------------------------------------------------
 $word_edit_data = null;
+$video_edit_data = null;
 $words = [];
+$videos = [];
 
-if ($unit_data && $unit_data['kategori'] === 'Vocabulary') {
-    // Ambil list kata di unit ini
-    try {
-        $stmt_words = $pdo->prepare("SELECT * FROM tb_audio WHERE id_materi = :id ORDER BY id_audio ASC");
-        $stmt_words->execute(['id' => $id_materi]);
-        $words = $stmt_words->fetchAll();
-    } catch (PDOException $e) {
-        $words = [];
-    }
+if ($unit_data) {
+    if ($unit_data['kategori'] === 'Vocabulary') {
+        // Ambil list kata di unit ini
+        try {
+            $stmt_words = $pdo->prepare("SELECT * FROM tb_audio WHERE id_materi = :id ORDER BY id_audio ASC");
+            $stmt_words->execute(['id' => $id_materi]);
+            $words = $stmt_words->fetchAll();
+        } catch (PDOException $e) {
+            $words = [];
+        }
 
-    // Jika sedang mengedit kata tertentu
-    if (isset($_GET['edit_word_id'])) {
-        $stmt_w = $pdo->prepare("SELECT * FROM tb_audio WHERE id_audio = :id");
-        $stmt_w->execute(['id' => intval($_GET['edit_word_id'])]);
-        $word_edit_data = $stmt_w->fetch();
+        // Jika sedang mengedit kata tertentu
+        if (isset($_GET['edit_word_id'])) {
+            $stmt_w = $pdo->prepare("SELECT * FROM tb_audio WHERE id_audio = :id");
+            $stmt_w->execute(['id' => intval($_GET['edit_word_id'])]);
+            $word_edit_data = $stmt_w->fetch();
+        }
+    } elseif ($unit_data['kategori'] === 'Conversation') {
+        // Ambil list video di unit ini
+        try {
+            $stmt_videos = $pdo->prepare("SELECT * FROM tb_video WHERE id_materi = :id ORDER BY id_video ASC");
+            $stmt_videos->execute(['id' => $id_materi]);
+            $videos = $stmt_videos->fetchAll();
+        } catch (PDOException $e) {
+            $videos = [];
+        }
+
+        // Jika sedang mengedit video tertentu
+        if (isset($_GET['edit_video_id'])) {
+            $stmt_v = $pdo->prepare("SELECT * FROM tb_video WHERE id_video = :id");
+            $stmt_v->execute(['id' => intval($_GET['edit_video_id'])]);
+            $video_edit_data = $stmt_v->fetch();
+        }
     }
 }
 ?>
@@ -450,27 +562,80 @@ if ($unit_data && $unit_data['kategori'] === 'Vocabulary') {
                         </table>
                     </div>
 
-                <!-- B. KELOLA VIDEO (PLACEHOLDER UNTUK CONVERSATION) -->
+                <!-- B. KELOLA VIDEO (UNTUK MATERI CONVERSATION) -->
                 <?php elseif ($unit_data['kategori'] === 'Conversation'): ?>
                     <div class="form-card">
-                        <div class="form-title">Upload Media Video Baru untuk <strong><?= htmlspecialchars($unit_data['judul_materi']) ?></strong></div>
-                        <div style="background-color: #eff6ff; border: 1.5px dashed #3b82f6; color: #1e3a8a; padding: 2rem; border-radius: 8px; text-align: center; margin-bottom: 2rem;">
-                            <h4 style="font-size: 1.1rem; margin-bottom: 0.5rem; font-weight: 700;">Form Upload Video Percakapan (Conversation)</h4>
-                            <p style="font-size: 0.9rem; color: #1e40af; margin-bottom: 1.5rem;">Fitur upload dan pemutaran video percakapan akan diaktifkan sepenuhnya pada modul minggu ke-5.</p>
-                            
-                            <!-- Placeholder form upload video -->
-                            <div style="max-width: 450px; margin: 0 auto; text-align: left; opacity: 0.5;">
-                                <div style="display: flex; flex-direction: column; margin-bottom: 1rem;">
-                                    <label style="font-weight: 600; margin-bottom: 0.25rem; font-size: 0.85rem;">Judul/Keterangan Video:</label>
-                                    <input type="text" class="form-control" placeholder="Contoh: Percakapan Greeting" disabled>
-                                </div>
-                                <div style="display: flex; flex-direction: column; margin-bottom: 1rem;">
-                                    <label style="font-weight: 600; margin-bottom: 0.25rem; font-size: 0.85rem;">Pilih File Video (mp4):</label>
-                                    <input type="file" class="form-control" disabled>
-                                </div>
-                                <button class="btn-sm btn-play" style="background-color: #3b82f6; width: 100%; border: none;" disabled>Upload Video</button>
-                            </div>
+                        <div class="form-title">
+                            <?= $video_edit_data ? 'Edit Keterangan / Ganti Video' : 'Upload Media Video Baru' ?> 
+                            untuk <strong><?= htmlspecialchars($unit_data['judul_materi']) ?></strong>
                         </div>
+                        
+                        <form action="upload_media.php?id_materi=<?= $unit_data['id_materi'] ?>" method="POST" enctype="multipart/form-data">
+                            <?php if ($video_edit_data): ?>
+                                <input type="hidden" name="id_video" value="<?= $video_edit_data['id_video'] ?>">
+                                <?php $keterangan_val = $video_edit_data['keterangan'] ?? ''; ?>
+                            <?php else: ?>
+                                <?php $keterangan_val = ''; ?>
+                            <?php endif; ?>
+
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                                <div style="display: flex; flex-direction: column;">
+                                    <label style="font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem;">Judul / Keterangan Video:</label>
+                                    <input type="text" name="keterangan" class="form-control" placeholder="Contoh: Dialog Percakapan Greeting" required value="<?= htmlspecialchars($keterangan_val) ?>">
+                                </div>
+                                <div style="display: flex; flex-direction: column;">
+                                    <label style="font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem;">
+                                        Pilih File Video (mp4, webm):
+                                        <?php if ($video_edit_data): ?>
+                                            <span style="font-size: 0.8rem; color: #d97706;">(Biarkan kosong jika tidak diganti)</span>
+                                        <?php endif; ?>
+                                    </label>
+                                    <input type="file" name="file_video" class="form-control" <?= $video_edit_data ? '' : 'required' ?> accept="video/*">
+                                </div>
+                            </div>
+
+                            <button type="submit" name="save_video" class="btn-sm btn-success">
+                                <?= $video_edit_data ? 'Update Video' : 'Simpan & Upload Video' ?>
+                            </button>
+                            <?php if ($video_edit_data): ?>
+                                <a href="upload_media.php?id_materi=<?= $unit_data['id_materi'] ?>" class="btn-sm" style="background-color: #6b7280; color: white; text-decoration: none; margin-left: 0.5rem;">Batal</a>
+                            <?php endif; ?>
+                        </form>
+                    </div>
+
+                    <h3>Daftar Media Video (Percakapan) di Unit Ini</h3>
+                    <div class="table-container">
+                        <table class="table-materi">
+                            <thead>
+                                <tr>
+                                    <th style="width: 35%;">Judul / Keterangan</th>
+                                    <th style="width: 45%;">Preview Video</th>
+                                    <th style="text-align: center; width: 20%;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (empty($videos)): ?>
+                                    <tr>
+                                        <td colspan="3" style="text-align: center; color: #6b7280; padding: 2rem;">
+                                            Belum ada file video terunggah untuk unit ini. Silakan unggah lewat form di atas.
+                                        </td>
+                                    </tr>
+                                <?php else: ?>
+                                    <?php foreach ($videos as $video): ?>
+                                        <tr>
+                                            <td style="font-weight: 600; color: var(--accent-blue);"><?= htmlspecialchars($video['keterangan']) ?></td>
+                                            <td>
+                                                <video src="../assets/video/<?= htmlspecialchars($video['file_video']) ?>" controls style="max-width: 250px; border-radius: 4px; background: #000000;"></video>
+                                            </td>
+                                            <td style="text-align: center;">
+                                                <a href="upload_media.php?id_materi=<?= $unit_data['id_materi'] ?>&edit_video_id=<?= $video['id_video'] ?>" class="btn-sm btn-edit">Edit</a>
+                                                <a href="upload_media.php?id_materi=<?= $unit_data['id_materi'] ?>&delete_video=<?= $video['id_video'] ?>" class="btn-sm btn-delete" onclick="return confirm('Apakah Anda yakin ingin menghapus file video beserta datanya?')">Hapus</a>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
                     </div>
 
                 <!-- C. KELOLA GRAMMAR (TIDAK BUTUH MEDIA) -->
