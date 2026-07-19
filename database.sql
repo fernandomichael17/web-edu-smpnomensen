@@ -12,6 +12,7 @@ CREATE TABLE tb_siswa (
     nama_siswa VARCHAR(100) NOT NULL,
     password VARCHAR(255) NOT NULL, -- Akan disimpan dalam bentuk hash
     kelas VARCHAR(50) NOT NULL,
+    last_login DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -21,6 +22,7 @@ CREATE TABLE tb_guru (
     nip VARCHAR(20) NOT NULL UNIQUE,
     nama_guru VARCHAR(100) NOT NULL,
     password VARCHAR(255) NOT NULL, -- Akan disimpan dalam bentuk hash
+    last_login DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -382,8 +382,9 @@ try {
                     <li><a href="kelola_materi.php" class="active">Kelola Materi</a></li>
                     <li><a href="upload_media.php">Upload Media</a></li>
                     <li><a href="#">Kelola Soal</a></li>
-                    <li><a href="#">Laporan Nilai</a></li>
-                    <li><a href="#">Pengaturan</a></li>
+                    <li><a href="laporan_nilai.php">Laporan Nilai</a></li>
+                    <li><a href="pengaturan.php">Pengaturan</a></li>
+                    <li><a href="kelola_siswa.php">Kelola Data Siswa</a></li>
                 </ul>
             </div>
             <!-- Tombol Keluar Sesi -->

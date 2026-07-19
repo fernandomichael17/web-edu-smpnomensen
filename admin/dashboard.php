@@ -1,50 +1,58 @@
 <?php
 /**
  * File: admin/dashboard.php
- * Deskripsi: Halaman Dashboard Guru/Admin.
- *            Menyajikan ringkasan statistik siswa, materi, kuis, dan aktivitas.
- *            Tampilan diselaraskan persis dengan storyboard proposal.
+ * Deskripsi: Halaman Dashboard Utama Administrator / Panel Guru.
+ *            Menyajikan statistik ringkas siswa, materi, kuis, rata-rata nilai,
+ *            dan log aktivitas gabungan terbaru (login, pengerjaan kuis, tambah materi).
  */
 
 // Memroteksi halaman ini agar hanya bisa diakses oleh guru yang sudah login
 require_once '../includes/auth_admin.php';
 
-// Memanggil koneksi database untuk menghitung statistik riil
+// Memanggil koneksi database
 require_once '../config.php';
 
-// 1. Menghitung Total Siswa dari Database
-$total_siswa = 0;
+// 1. Menghitung Statistik Ringkas
 try {
     $total_siswa = $pdo->query("SELECT COUNT(*) FROM tb_siswa")->fetchColumn();
-} catch (PDOException $e) {
-    $total_siswa = 0; // Fallback jika terjadi error database
-}
-
-// 2. Menghitung Total Materi Aktif
-$total_materi = 0;
-try {
     $total_materi = $pdo->query("SELECT COUNT(*) FROM tb_materi")->fetchColumn();
-} catch (PDOException $e) {
-    $total_materi = 0;
-}
-
-// 3. Menghitung Total Kuis Tersedia
-$total_kuis = 0;
-try {
     $total_kuis = $pdo->query("SELECT COUNT(*) FROM tb_kuis")->fetchColumn();
+    
+    $avg_score_raw = $pdo->query("SELECT AVG(skor) FROM tb_hasil")->fetchColumn();
+    $rata_rata_nilai = $avg_score_raw !== null ? round($avg_score_raw, 1) : 0;
 } catch (PDOException $e) {
-    $total_kuis = 0;
+    die("Error database saat memuat statistik: " . $e->getMessage());
 }
 
-// 4. Menghitung Rata-rata Nilai Kuis Siswa
-$rata_rata_nilai = 0.0;
+// 2. Fetch Log Aktivitas Terakhir (UNION dari beberapa sumber)
+$activities = [];
 try {
-    $rata_rata_nilai = $pdo->query("SELECT AVG(skor) FROM tb_hasil")->fetchColumn();
-    if (!$rata_rata_nilai) {
-        $rata_rata_nilai = 78.5; // Fallback dummy sesuai storyboard jika tb_hasil masih kosong
-    }
+    $sql_union = "
+        SELECT 'kuis' as tipe, h.waktu_selesai as tanggal, s.nama_siswa, s.kelas, k.judul_kuis as detail, h.skor
+        FROM tb_hasil h
+        JOIN tb_siswa s ON h.id_siswa = s.id_siswa
+        JOIN tb_kuis k ON h.id_kuis = k.id_kuis
+        
+        UNION ALL
+        
+        SELECT 'materi' as tipe, m.created_at as tanggal, '' as nama_siswa, '' as kelas, CONCAT(m.kategori, ' - ', m.judul_materi) as detail, 0 as skor
+        FROM tb_materi m
+        
+        UNION ALL
+        
+        SELECT 'login' as tipe, s.last_login as tanggal, s.nama_siswa, s.kelas, 'Siswa Login' as detail, 0 as skor
+        FROM tb_siswa s
+        WHERE s.last_login IS NOT NULL
+        
+        ORDER BY tanggal DESC
+        LIMIT 10
+    ";
+    
+    $stmt_union = $pdo->query($sql_union);
+    $activities = $stmt_union->fetchAll();
 } catch (PDOException $e) {
-    $rata_rata_nilai = 78.5; // Fallback dummy jika database error
+    // Fail-safe jika union error
+    $activities = [];
 }
 ?>
 <!DOCTYPE html>
@@ -58,10 +66,9 @@ try {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Memanggil CSS Utama -->
-    <link rel="stylesheet" href="../assets/css/style.css?v=1.0.1">
+    <link rel="stylesheet" href="../assets/css/style.css?v=1.0.2">
     
     <style>
-        /* Layout Pembagian Kolom Horizontal (Sesuai Storyboard) */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #ffffff;
@@ -77,10 +84,10 @@ try {
             width: 100%;
         }
 
-        /* Sidebar Sederhana Admin Sesuai Gambar Storyboard */
+        /* Sidebar Navigasi Abu-Abu (Sesuai Storyboard) */
         .sidebar {
-            width: 250px;
-            background-color: #e5e7eb; /* Abu-abu terang sesuai storyboard */
+            width: 260px;
+            background-color: #e5e7eb;
             color: #1f2937;
             padding: 1.5rem 1.25rem;
             display: flex;
@@ -105,6 +112,8 @@ try {
 
         .sidebar-menu {
             list-style: none;
+            padding: 0;
+            margin: 0;
             flex-grow: 1;
         }
 
@@ -116,14 +125,14 @@ try {
             color: #374151;
             text-decoration: none;
             padding: 0.75rem 1rem;
-            border: 2px solid #9ca3af; /* Kotak outline sesuai gambar storyboard */
+            border: 2px solid #9ca3af;
             border-radius: 4px;
             display: block;
             font-weight: 700;
             text-align: center;
             background-color: #ffffff;
             transition: all 0.2s ease-in-out;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
 
         .sidebar-menu a:hover {
@@ -134,7 +143,7 @@ try {
 
         .sidebar-menu a.active {
             color: #ffffff;
-            background-color: #4b5563; /* Tombol aktif abu-abu gelap sesuai gambar storyboard */
+            background-color: #4b5563;
             border-color: #374151;
         }
 
@@ -163,17 +172,16 @@ try {
             overflow-y: auto;
         }
 
-        /* Struktur Card Stats Sesuai Storyboard */
+        /* Card Stats */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.5rem;
-            margin-top: 1.5rem;
             margin-bottom: 2.5rem;
         }
 
         .stat-card {
-            border: 2px solid #374151; /* Outline tebal sesuai storyboard */
+            border: 2px solid #374151;
             border-radius: 4px;
             overflow: hidden;
             background: #ffffff;
@@ -181,7 +189,7 @@ try {
         }
 
         .stat-card-header {
-            background-color: #e5e7eb; /* Kepala kartu abu-abu */
+            background-color: #e5e7eb;
             border-bottom: 2px solid #374151;
             padding: 0.65rem 1rem;
             text-align: center;
@@ -199,7 +207,7 @@ try {
             font-family: 'Outfit', sans-serif;
         }
 
-        /* Struktur Baris Aktivitas Sesuai Storyboard */
+        /* Baris Aktivitas */
         .activity-container {
             display: flex;
             flex-direction: column;
@@ -224,23 +232,16 @@ try {
 
         .activity-time {
             color: #374151;
-            padding: 0.75rem 1.25rem;
+            padding: 0.75rem 1rem;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             text-align: center;
             border-right: 2px solid #374151;
-            min-width: 90px;
+            min-width: 130px;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        .activity-time-gray {
             background-color: #cbd5e1;
-        }
-
-        .activity-time-white {
-            background-color: #ffffff;
         }
 
         .activity-text {
@@ -260,32 +261,33 @@ try {
         Dashboard Administrator - Panel Guru
     </header>
 
-    <!-- Pembungkus Layout Tengah -->
     <div class="admin-layout">
-        <!-- Sidebar Navigasi Kiri (Sesuai Storyboard) -->
+        <!-- Sidebar Navigasi Kiri (PERSIS 7 Menu Sesuai Tugas) -->
         <aside class="sidebar">
             <div class="sidebar-brand">
-                <h3>Admin</h3>
+                <h3>Admin Nommensen</h3>
                 <ul class="sidebar-menu">
                     <li><a href="dashboard.php" class="active">Dashboard</a></li>
                     <li><a href="kelola_materi.php">Kelola Materi</a></li>
                     <li><a href="upload_media.php">Upload Media</a></li>
                     <li><a href="#">Kelola Soal</a></li>
-                    <li><a href="#">Laporan Nilai</a></li>
-                    <li><a href="#">Pengaturan</a></li>
+                    <li><a href="laporan_nilai.php">Laporan Nilai</a></li>
+                    <li><a href="pengaturan.php">Pengaturan</a></li>
+                    <li><a href="kelola_siswa.php">Kelola Data Siswa</a></li>
                 </ul>
             </div>
             <!-- Tombol Keluar Sesi -->
-            <a href="logout.php" class="btn-logout-sidebar">Keluar (Logout)</a>
+            <a href="logout.php" class="btn-logout-sidebar" onclick="return confirm('Apakah Anda yakin ingin keluar?')">Keluar (Logout)</a>
         </aside>
 
-        <!-- Area Konten Utama Kanan (Sesuai Storyboard) -->
+        <!-- Area Konten Utama Kanan -->
         <main class="main-content">
-            <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 1.5rem;">
-                Ringkasan Aktivitas
-            </h2>
+            <div style="margin-bottom: 2rem;">
+                <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.6rem; font-weight: 800; color: #111827;">Selamat Datang, <?= htmlspecialchars($_SESSION['admin_nama']) ?>!</h2>
+                <p style="color: #6b7280; font-size: 0.95rem; margin-top: 0.25rem;">Gunakan panel ini untuk mengelola siswa, mengunggah materi pembelajaran multimedia, dan mengevaluasi hasil nilai kuis.</p>
+            </div>
 
-            <!-- Grid 4 Statistik (Sesuai Storyboard) -->
+            <!-- Grid Statistik Ringkas -->
             <div class="stats-grid">
                 <!-- 1. Total Siswa -->
                 <div class="stat-card">
@@ -308,33 +310,41 @@ try {
                 <!-- 4. Rata-rata Nilai -->
                 <div class="stat-card">
                     <div class="stat-card-header">Rata-rata Nilai</div>
-                    <div class="stat-card-body"><?= number_format($rata_rata_nilai, 1) ?></div>
+                    <div class="stat-card-body"><?= $rata_rata_nilai ?></div>
                 </div>
             </div>
 
-            <!-- Aktivitas Terakhir (Sesuai Storyboard) -->
-            <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 700; color: #111827; margin-top: 2rem;">
-                Aktivitas Terakhir:
+            <!-- Aktivitas Terakhir -->
+            <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 800; color: #111827; margin-top: 2rem; border-bottom: 2px solid #cbd5e1; padding-bottom: 0.5rem;">
+                Log Aktivitas Terakhir
             </h3>
 
             <div class="activity-container">
-                <!-- Log 1: Gray -->
-                <div class="activity-row activity-row-gray">
-                    <div class="activity-time activity-time-gray">09:30</div>
-                    <div class="activity-text">Siswa Kelas 8A mengerjakan Kuis Grammar</div>
-                </div>
-
-                <!-- Log 2: White -->
-                <div class="activity-row activity-row-white">
-                    <div class="activity-time activity-time-white">08:15</div>
-                    <div class="activity-text">Guru upload video Conversation Unit 3</div>
-                </div>
-
-                <!-- Log 3: Gray -->
-                <div class="activity-row activity-row-gray">
-                    <div class="activity-time activity-time-gray">07:45</div>
-                    <div class="activity-text">Siswa Kelas 7B login ke sistem</div>
-                </div>
+                <?php if (empty($activities)): ?>
+                    <div style="padding: 2rem; text-align: center; color: #6b7280; border: 2px dashed #cbd5e1; border-radius: 4px;">
+                        Belum ada riwayat aktivitas di sistem.
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($activities as $idx => $act): ?>
+                        <?php 
+                        $time_str = date('d M - H:i', strtotime($act['tanggal']));
+                        $row_bg_class = ($idx % 2 === 0) ? 'activity-row-gray' : 'activity-row-white';
+                        
+                        $text = "";
+                        if ($act['tipe'] === 'kuis') {
+                            $text = "Siswa <strong>" . htmlspecialchars($act['nama_siswa']) . "</strong> (Kelas " . htmlspecialchars($act['kelas']) . ") selesai mengerjakan <strong>" . htmlspecialchars($act['detail']) . "</strong> dengan skor <strong>" . $act['skor'] . "</strong>";
+                        } elseif ($act['tipe'] === 'materi') {
+                            $text = "Materi baru ditambahkan: <strong>" . htmlspecialchars($act['detail']) . "</strong>";
+                        } elseif ($act['tipe'] === 'login') {
+                            $text = "Siswa <strong>" . htmlspecialchars($act['nama_siswa']) . "</strong> (Kelas " . htmlspecialchars($act['kelas']) . ") login ke sistem";
+                        }
+                        ?>
+                        <div class="activity-row <?= $row_bg_class ?>">
+                            <div class="activity-time"><?= $time_str ?></div>
+                            <div class="activity-text"><?= $text ?></div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </main>
     </div>

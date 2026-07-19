@@ -43,6 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Regenerate session ID demi keamanan (mencegah Session Fixation)
                 session_regenerate_id(true);
 
+                // Update timestamp last_login di database
+                $stmt_ll = $pdo->prepare("UPDATE tb_siswa SET last_login = NOW() WHERE id_siswa = :id");
+                $stmt_ll->execute(['id' => $siswa['id_siswa']]);
+
                 // Set session data login siswa
                 $_SESSION['siswa_logged_in'] = true;
                 $_SESSION['siswa_id'] = $siswa['id_siswa'];
