@@ -370,17 +370,44 @@ require_once '../includes/sidebar.php';
             }
         });
 
-        // 7. Menyelesaikan Sesi Kuis & Pembersihan Cache
+        // 7. Menyelesaikan Sesi Kuis, Submit Jawaban, & Pembersihan Cache
         function finishQuiz() {
-            // Hapus cache pengerjaan kuis ini dari localStorage
-            localStorage.removeItem(storageKeyAnswers);
-            localStorage.removeItem(storageKeyTime);
-            
             // Hentikan interval timer
             clearInterval(timerInterval);
-            
-            // Redirect ke halaman kuis dengan status completed (sementara belum simpan ke tb_hasil)
-            window.location.href = 'kuis.php?status=completed';
+
+            // Hitung waktu pengerjaan (dalam detik)
+            const elapsed = (waktuKuisMin * 60) - timeLeft;
+
+            // Buat form dinamis untuk submit ke kuis_proses.php secara aman
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = 'kuis_proses.php';
+
+            const kuisInput = document.createElement('input');
+            kuisInput.type = 'hidden';
+            kuisInput.name = 'id_kuis';
+            kuisInput.value = quizId;
+            form.appendChild(kuisInput);
+
+            const elapsedInput = document.createElement('input');
+            elapsedInput.type = 'hidden';
+            elapsedInput.name = 'elapsed_time';
+            elapsedInput.value = elapsed;
+            form.appendChild(elapsedInput);
+
+            const answersInput = document.createElement('input');
+            answersInput.type = 'hidden';
+            answersInput.name = 'answers';
+            answersInput.value = JSON.stringify(answers);
+            form.appendChild(answersInput);
+
+            document.body.appendChild(form);
+
+            // Hapus cache pengerjaan kuis ini dari localStorage sebelum submit
+            localStorage.removeItem(storageKeyAnswers);
+            localStorage.removeItem(storageKeyTime);
+
+            form.submit();
         }
     </script>
 
