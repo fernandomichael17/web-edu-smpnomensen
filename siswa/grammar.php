@@ -4,6 +4,9 @@
  * Deskripsi: Halaman Pembelajaran Grammar (Placeholder).
  */
 
+// Memroteksi halaman siswa agar wajib login
+require_once '../includes/auth_siswa.php';
+
 $page_title = 'Grammar';
 $active_page = 'grammar';
 

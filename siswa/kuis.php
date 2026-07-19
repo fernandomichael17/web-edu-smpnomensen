@@ -4,6 +4,9 @@
  * Deskripsi: Halaman Kuis & Latihan Soal (Placeholder).
  */
 
+// Memroteksi halaman siswa agar wajib login
+require_once '../includes/auth_siswa.php';
+
 $page_title = 'Kuis & Latihan Soal';
 $active_page = 'kuis';
 

@@ -49,7 +49,7 @@ $has_logo = file_exists($logo_path);
 
         <!-- Tombol Aksi Tumpuk Vertikal (Sesuai Storyboard) -->
         <div class="action-buttons">
-            <a href="siswa/index.php" class="btn btn-primary" id="btn-siswa">Mulai Belajar</a>
+            <a href="siswa/login.php" class="btn btn-primary" id="btn-siswa">Mulai Belajar</a>
             <a href="admin/login.php" class="btn btn-secondary" id="btn-guru">Login Guru</a>
         </div>
     </main>

@@ -4,6 +4,9 @@
  * Deskripsi: Halaman Riwayat Nilai Siswa (Placeholder).
  */
 
+// Memroteksi halaman siswa agar wajib login
+require_once '../includes/auth_siswa.php';
+
 $page_title = 'Riwayat Nilai';
 $active_page = 'riwayat';
 

@@ -4,6 +4,9 @@
  * Deskripsi: Halaman Pembelajaran Conversation (Placeholder).
  */
 
+// Memroteksi halaman siswa agar wajib login
+require_once '../includes/auth_siswa.php';
+
 $page_title = 'Conversation';
 $active_page = 'conversation';
 

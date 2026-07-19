@@ -4,6 +4,9 @@
  * Deskripsi: Halaman Pembelajaran Vocabulary (Placeholder).
  */
 
+// Memroteksi halaman siswa agar wajib login
+require_once '../includes/auth_siswa.php';
+
 $page_title = 'Vocabulary';
 $active_page = 'vocabulary';
 

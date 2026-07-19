@@ -5,6 +5,9 @@
  *            Berisi 5 kartu navigasi modul belajar (Vocabulary, Grammar, Conversation, Kuis, Riwayat Nilai).
  */
 
+// Memroteksi halaman siswa agar wajib login
+require_once '../includes/auth_siswa.php';
+
 $page_title = 'Menu Utama';
 $active_page = 'menu';
 
